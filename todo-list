@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e0f7fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            width: 350px;
+            text-align: center;
+            position: relative;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #00796b;
+        }
+
+        #task-form {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+
+        #task-input, #start-time, #end-time {
+            padding: 10px;
+            border: 1px solid #b2dfdb;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #00796b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
+        button:hover {
+            background-color: #004d40;
+        }
+
+        #task-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .task-item {
+            background: #e0f2f1;
+            padding: 10px;
+            border: 1px solid #80cbc4;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .task-item.completed {
+            text-decoration: line-through;
+            color: #004d40;
+        }
+
+        .task-item button {
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .task-item button.delete-btn {
+            color: #ff5252;
+        }
+
+        .task-item button.delete-btn:hover {
+            color: #d50000;
+        }
+
+        .times {
+            font-size: 0.9em;
+            color: #00796b;
+        }
+
+        .crackers {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .crackers.active {
+            display: block;
+        }
+
+        .cracker {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: red;
+            border-radius: 50%;
+            animation: explode 0.8s ease-out;
+            opacity: 0;
+        }
+
+        @keyframes explode {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(5);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>To-Do List</h1>
+        <form id="task-form">
+            <input type="text" id="task-input" placeholder="Enter a new task" required>
+            <input type="time" id="start-time" placeholder="Start Time" required>
+            <input type="time" id="end-time" placeholder="End Time" required>
+            <button type="submit">Add Task</button>
+        </form>
+        <ul id="task-list"></ul>
+        <div class="crackers" id="crackers"></div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const taskForm = document.getElementById('task-form');
+            const taskInput = document.getElementById('task-input');
+            const startTimeInput = document.getElementById('start-time');
+            const endTimeInput = document.getElementById('end-time');
+            const taskList = document.getElementById('task-list');
+            const crackers = document.getElementById('crackers');
+
+            taskForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                addTask(taskInput.value, startTimeInput.value, endTimeInput.value);
+                taskInput.value = '';
+                startTimeInput.value = '';
+                endTimeInput.value = '';
+            });
+
+            taskList.addEventListener('click', (e) => {
+                if (e.target.classList.contains('delete-btn')) {
+                    deleteTask(e.target.parentElement);
+                } else if (e.target.classList.contains('task-item')) {
+                    toggleTaskCompletion(e.target);
+                }
+            });
+
+            function addTask(task, startTime, endTime) {
+                const li = document.createElement('li');
+                li.className = 'task-item';
+                li.innerHTML = `
+                    ${task}
+                    <div class="times">
+                        ${startTime} - ${endTime}
+                    </div>
+                    <button class="delete-btn">Delete</button>
+                `;
+                taskList.appendChild(li);
+            }
+
+            function deleteTask(taskElement) {
+                taskList.removeChild(taskElement);
+            }
+
+            function toggleTaskCompletion(taskElement) {
+                taskElement.classList.toggle('completed');
+                if (taskElement.classList.contains('completed')) {
+                    showCrackers();
+                }
+            }
+
+            function showCrackers() {
+                const crackerCount = 30;
+                crackers.innerHTML = '';
+                for (let i = 0; i < crackerCount; i++) {
+                    const cracker = document.createElement('div');
+                    cracker.className = 'cracker';
+                    cracker.style.top = `${Math.random() * 100}%`;
+                    cracker.style.left = `${Math.random() * 100}%`;
+                    cracker.style.background = getRandomColor();
+                    crackers.appendChild(cracker);
+                }
+                crackers.classList.add('active');
+                setTimeout(() => {
+                    crackers.classList.remove('active');
+                }, 1000);
+            }
+
+            function getRandomColor() {
+                const letters = '0123456789ABCDEF';
+                let color = '#';
+                for (let i = 0; i < 6; i++) {
+                    color += letters[Math.floor(Math.random() * 16)];
+                }
+                return color;
+            }
+        });
+    </script>
+</body>
+</html>
